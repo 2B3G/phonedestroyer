@@ -1,0 +1,19 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Status bar color -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <!-- Make status bar icons dark (for light backgrounds) -->
+        <item name="android:windowLightStatusBar">true</item>
+
+        <!-- Navigation bar color - white so icons show -->
+        <item name="android:navigationBarColor">@android:color/white</item>
+
+        <!-- Hint text colors -->
+        <item name="android:textColorHint">#666666</item>
+        <item name="colorControlNormal">#666666</item>
+        <item name="colorControlActivated">#000000</item>
+    </style>
+
+    <style name="Theme.PhoneDestroyer" parent="Base.Theme.PhoneDestroyer" />
+</resources>
