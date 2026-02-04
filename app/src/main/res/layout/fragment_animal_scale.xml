@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <!-- Lower speed animal -->
+    <ImageView
+        android:id="@+id/lowerAnimalImage"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/lowerAnimalName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Snail"
+        android:textSize="14sp"
+        android:textColor="@android:color/black"
+        android:fontFamily="@font/roboto"
+        app:layout_constraintTop_toBottomOf="@id/lowerAnimalImage"
+        app:layout_constraintStart_toStartOf="@id/lowerAnimalImage"
+        android:layout_marginTop="8dp"/>
+
+    <!-- Less-than sign -->
+    <TextView
+        android:id="@+id/lessThanSign"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&lt;"
+        android:textSize="20sp"
+        android:textColor="@android:color/black"
+        android:fontFamily="@font/roboto_medium"
+        app:layout_constraintStart_toEndOf="@id/lowerAnimalImage"
+        app:layout_constraintEnd_toStartOf="@id/middleAnimalSpeed"
+        app:layout_constraintTop_toTopOf="@id/lowerAnimalImage"
+        app:layout_constraintBottom_toBottomOf="@id/lowerAnimalImage"
+        android:gravity="center"/>
+
+    <!-- Middle speed indicator -->
+    <TextView
+        android:id="@+id/middleAnimalSpeed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="5 m/s"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        android:fontFamily="@font/roboto_medium"
+        app:layout_constraintStart_toEndOf="@id/lessThanSign"
+        app:layout_constraintEnd_toStartOf="@id/greaterThanSign"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/lowerAnimalImage"
+        android:gravity="center"/>
+
+    <!-- Greater-than sign -->
+    <TextView
+        android:id="@+id/greaterThanSign"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&lt;"
+        android:textSize="20sp"
+        android:textColor="@android:color/black"
+        android:fontFamily="@font/roboto_medium"
+        app:layout_constraintStart_toEndOf="@id/middleAnimalSpeed"
+        app:layout_constraintEnd_toStartOf="@id/higherAnimalImage"
+        app:layout_constraintTop_toTopOf="@id/lowerAnimalImage"
+        app:layout_constraintBottom_toBottomOf="@id/lowerAnimalImage"
+        android:gravity="center"/>
+
+    <!-- Higher speed animal -->
+    <ImageView
+        android:id="@+id/higherAnimalImage"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/higherAnimalName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rabbit"
+        android:textSize="14sp"
+        android:textColor="@android:color/black"
+        android:fontFamily="@font/roboto"
+        app:layout_constraintTop_toBottomOf="@id/higherAnimalImage"
+        app:layout_constraintStart_toStartOf="@id/higherAnimalImage"
+        android:layout_marginTop="8dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
