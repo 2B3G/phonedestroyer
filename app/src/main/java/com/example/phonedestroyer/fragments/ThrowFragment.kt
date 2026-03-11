@@ -101,6 +101,9 @@ class ThrowFragment : Fragment(R.layout.throw_layout), SensorEventListener {
         val distance: String,
         val acceleration: String,
         val speed: String,
+        val distanceVal: Double = 0.0,
+        val accelerationVal: Double = 0.0,
+        val speedVal: Double = 0.0,
         val timeSeries: List<TimePoint>? = null
     )
 

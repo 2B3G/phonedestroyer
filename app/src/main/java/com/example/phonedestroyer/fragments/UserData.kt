@@ -19,6 +19,7 @@ import com.example.phonedestroyer.MainActivity
 import com.example.phonedestroyer.ThrowDataAdapter
 import com.example.phonedestroyer.ThrowFragment
 import com.example.phonedestroyer.ThrowFragment.TimePoint
+import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,6 +35,9 @@ class UserData : Fragment(R.layout.user_data_layout) {
     private lateinit var progressBar: ProgressBar
     private lateinit var errorText: TextView
     private lateinit var adapter: ThrowDataAdapter
+    private lateinit var chipGroupFilters: ChipGroup
+
+    private var allThrows = listOf<ThrowFragment.ThrowData>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -43,6 +47,7 @@ class UserData : Fragment(R.layout.user_data_layout) {
         recyclerView = view.findViewById(R.id.recyclerViewThrows)
         progressBar = view.findViewById(R.id.progressBar)
         errorText = view.findViewById(R.id.errorText)
+        chipGroupFilters = view.findViewById(R.id.chipGroupFilters)
 
         // Load username from SharedPreferences
         val sp = requireActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE)
@@ -62,7 +67,25 @@ class UserData : Fragment(R.layout.user_data_layout) {
             logout()
         }
 
+        // Filter/Sort selection listener
+        chipGroupFilters.setOnCheckedStateChangeListener { group, checkedIds ->
+            applyFilter(checkedIds.firstOrNull())
+        }
+
         loadThrowData()
+    }
+
+    private fun applyFilter(checkedId: Int?) {
+        if (allThrows.isEmpty()) return
+
+        val sortedList = when (checkedId) {
+            R.id.chipSpeed -> allThrows.sortedByDescending { it.speedVal }
+            R.id.chipAccel -> allThrows.sortedByDescending { it.accelerationVal }
+            R.id.chipDistance -> allThrows.sortedByDescending { it.distanceVal }
+            else -> allThrows // R.id.chipAll or nothing - original order (likely chronological)
+        }
+        adapter.submitList(sortedList)
+        recyclerView.scrollToPosition(0)
     }
 
     private fun logout() {
@@ -103,45 +126,43 @@ class UserData : Fragment(R.layout.user_data_layout) {
                                     val item = jsonArray.getJSONObject(i)
                                     Log.d("UserData", "Item $i: $item")
 
-                                    // Get throw ID - API currently doesn't return it, so use index as fallback
                                     val throwId = when {
                                         item.has("id") -> item.get("id").toString()
                                         item.has("_id") -> item.getString("_id")
-                                        else -> i.toString() // fallback to index until API is fixed
+                                        else -> i.toString()
                                     }
 
-                                    // Parse values - API returns numbers, convert to strings for display
-                                    val distance = when {
-                                        item.has("distance") -> "${item.get("distance")} m"
-                                        else -> "N/A"
+                                    val dVal = if (item.has("distance")) item.getDouble("distance") else 0.0
+                                    val aVal = when {
+                                        item.has("acceleration") -> item.getDouble("acceleration")
+                                        item.has("accel") -> item.getDouble("accel")
+                                        else -> 0.0
                                     }
+                                    val sVal = if (item.has("speed")) item.getDouble("speed") else 0.0
 
-                                    val acceleration = when {
-                                        item.has("acceleration") -> "${item.get("acceleration")} m/s²"
-                                        item.has("accel") -> "${item.get("accel")} m/s²"
-                                        else -> "N/A"
-                                    }
-
-                                    val speed = when {
-                                        item.has("speed") -> "${item.get("speed")} km/h"
-                                        else -> "N/A"
-                                    }
-
-                                    Log.d("UserData", "Parsed throw: id=$throwId, speed=$speed, accel=$acceleration, dist=$distance")
+                                    val distanceStr = "%.2f m".format(dVal)
+                                    val accelerationStr = "%.2f m/s²".format(aVal)
+                                    val speedStr = "%.2f km/h".format(sVal)
 
                                     throws.add(
                                         ThrowFragment.ThrowData(
                                             id = throwId,
-                                            distance = distance,
-                                            acceleration = acceleration,
-                                            speed = speed,
-                                            timeSeries = null // Don't load initially
+                                            distance = distanceStr,
+                                            acceleration = accelerationStr,
+                                            speed = speedStr,
+                                            distanceVal = dVal,
+                                            accelerationVal = aVal,
+                                            speedVal = sVal,
+                                            timeSeries = null
                                         )
                                     )
                                 }
 
-                                Log.d("UserData", "Loaded ${throws.size} throws")
-                                adapter.submitList(throws)
+                                allThrows = throws
+                                
+                                // Apply current filter if any
+                                applyFilter(chipGroupFilters.checkedChipId)
+                                
                                 progressBar.visibility = View.GONE
                                 recyclerView.visibility = View.VISIBLE
                             } else {
@@ -150,7 +171,6 @@ class UserData : Fragment(R.layout.user_data_layout) {
                             }
                         } catch (e: Exception) {
                             Log.e("UserData", "Error parsing data: ${e.message}")
-                            // This catch block handles JSON parsing errors or the explicit throw
                             progressBar.visibility = View.GONE
                             errorText.visibility = View.VISIBLE
                             errorText.text = "Nie udało się załadować tabeli wyników"
@@ -181,13 +201,11 @@ class UserData : Fragment(R.layout.user_data_layout) {
                 val sp = requireActivity().getSharedPreferences("user_data", Context.MODE_PRIVATE)
                 val uid = sp.getString("uid", "").toString()
 
-                // Fixed endpoint - removed trailing slash
                 HttpHelper.instance.get("${BuildConfig.API_BASE_URL}/user/${uid}/throw/${throwId}", mapOf("token" to uid)) {
                         ok, body ->
                     CoroutineScope(Dispatchers.Main).launch {
                         if (ok) {
                             try {
-                                Log.d("UserData", "Time series response: $body")
                                 val points = JSONArray(body)
                                 val parsed = mutableListOf<TimePoint>()
 
@@ -201,23 +219,25 @@ class UserData : Fragment(R.layout.user_data_layout) {
                                     ))
                                 }
 
-                                Log.d("UserData", "Loaded ${parsed.size} time series points")
-                                // Update the adapter with the loaded time series data
                                 adapter.updateTimeSeries(throwId, parsed)
+                                
+                                // Also update in allThrows to keep it in sync if needed later
+                                val index = allThrows.indexOfFirst { it.id == throwId }
+                                if (index != -1) {
+                                    val updatedList = allThrows.toMutableList()
+                                    updatedList[index] = updatedList[index].copy(timeSeries = parsed)
+                                    allThrows = updatedList
+                                }
+                                
                             } catch (e: Exception) {
-                                // Handle parsing error - just log, don't show error to user
                                 Log.e("UserData", "Error parsing time series: ${e.message}")
-                                e.printStackTrace()
                             }
-                        } else {
-                            Log.e("UserData", "Failed to load time series for throw $throwId")
                         }
                     }
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     Log.e("UserData", "Error loading time series: ${e.message}")
-                    e.printStackTrace()
                 }
             }
         }
