@@ -35,29 +35,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Filter/Sort Chips -->
-    <HorizontalScrollView
-        android:id="@+id/filterScrollView"
-        android:layout_width="match_parent"
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroupFilters"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:paddingHorizontal="16dp"
-        android:scrollbars="none"
-        app:layout_constraintTop_toBottomOf="@id/btnLogout">
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chipGroupFilters"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:singleSelection="true"
-            app:selectionRequired="true">
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        app:layout_constraintTop_toBottomOf="@id/btnLogout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp">
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipAll"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Wszystkie"
+                android:text="Czas dodania"
                 android:checked="true" />
 
             <com.google.android.material.chip.Chip
@@ -82,7 +76,6 @@
                 android:text="Dystans" />
 
         </com.google.android.material.chip.ChipGroup>
-    </HorizontalScrollView>
 
     <!-- Data Container -->
     <androidx.cardview.widget.CardView
@@ -95,7 +88,7 @@
         android:layout_marginBottom="16dp"
         app:cardCornerRadius="20dp"
         app:cardElevation="4dp"
-        app:layout_constraintTop_toBottomOf="@id/filterScrollView"
+        app:layout_constraintTop_toBottomOf="@id/chipGroupFilters"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
